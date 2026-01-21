@@ -9,41 +9,50 @@ public class Terrain
     {
         // Create mesh
         Mesh mesh = new Mesh();
-        NativeArray<Vector3> vertices = new NativeArray<Vector3>((size.x+1)*(size.y+1), Allocator.Temp);
+        NativeArray<Vector3> vertices = new NativeArray<Vector3>(999999999, Allocator.Temp);
         NativeArray<int> triangles = new NativeArray<int>((size.x * size.y) *6, Allocator.Temp);
+        List<Vector3> verticesList = new List<Vector3>();
+        
         
         int count = 0;
-        for (int i = 0; i < size.x+1; i++)
+        for (int x = 0; x < size.x; x++)
         {
-            for (int j = 0; j < size.y+1; j++)
+            for (int y = 0; y < size.y; y++)
             {
-                vertices[count] = new Vector3(i, 0, j);
+                vertices[count] = new Vector3(x, 0, y);
+                Debug.Log(vertices[count]);
+                count++;
+                vertices[count] = new Vector3(x, 0, y + 1);
+                Debug.Log(vertices[count]);
+                count++;
+                vertices[count] = new Vector3(x + 1, 0, y);
+                Debug.Log(vertices[count]);
                 count++;
             }
         }
-
+        
+        for (int x = size.x; x >0; x--)
+        {
+            for (int y = size.y; y > 0; y--)
+            {
+                vertices[count] = new Vector3(x, 0, y);
+                Debug.Log(vertices[count]);
+                count++;
+                vertices[count] = new Vector3(x, 0, y - 1);
+                Debug.Log(vertices[count]);
+                count++;
+                vertices[count] = new Vector3(x - 1, 0, y);
+                Debug.Log(vertices[count]);
+                count++;
+            }
+        }
+        
         count = 0;
-        for (int i = 0; i < size.x + 1; i++)
+        for (int x = 0; x < (size.x)*(size.y)*6; x++)
         {
-            for (int j = 0; j < size.y + 1; j++)
-            {
-                triangles[count] = (i)+j;
-                count++;
-            }
+            triangles[count] = x;
+            count++;
         }
-        
-        /*
-         i=0;
-         triangels[count]
-         
-        012
-        132
-        
-        143
-        453
-        
-        
-        */
         
         // Populate the mesh with data
         mesh.SetVertices(vertices);
