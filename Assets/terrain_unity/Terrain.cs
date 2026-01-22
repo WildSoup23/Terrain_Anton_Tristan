@@ -5,22 +5,33 @@ using UnityEngine;
 
 public class Terrain
 {
-    public Mesh Regenerate(Vector2Int size, Vector2Int resolution, bool flip)
+    private Texture2D noiseTex;
+    private Color[] pix;
+
+    public Mesh Regenerate(Vector2Int size, Vector2Int resolution, bool flip, Texture2D heightmap, Vector3 heightMapSize, bool generateHeightMap, MeshRenderer ren, float noiseScale, Vector2 org)
     {
+        if (generateHeightMap)
+        {
+            noiseTex= new Texture2D((int)heightMapSize.x, (int)heightMapSize.y);
+            pix = new Color[noiseTex.width * noiseTex.height];
+            CalcNoise(noiseScale, org);
+            ren.material.mainTexture = noiseTex;
+            heightmap = noiseTex;
+        }
+        
         // Create mesh
         Mesh mesh = new Mesh();
-        NativeArray<Vector3> Vertices = CalculateVertices(size, resolution);
+        NativeArray<Vector3> Vertices = CalculateVertices(size, resolution, heightmap, heightMapSize,generateHeightMap);
         int[] Triangles = CalculateTriangles(size, resolution,flip);
         
         // Populate the mesh with data
         mesh.SetVertices(Vertices);
         mesh.SetTriangles(Triangles, 0);
-        
         // Return 
         return mesh;
     }
 
-    private NativeArray<Vector3> CalculateVertices(Vector2Int size, Vector2Int resolution)
+    private NativeArray<Vector3> CalculateVertices(Vector2Int size, Vector2Int resolution,Texture2D heightmap ,Vector3 heightMapSize, bool generateHeightMap)
     {
         NativeArray<Vector3> vertices = new NativeArray<Vector3>((resolution.x + 1)*(resolution.y + 1), Allocator.Temp);
         
@@ -29,7 +40,11 @@ public class Terrain
         {
             for (int y = 0; y < resolution.y + 1; y++)
             {
-                vertices[count] = new Vector3((x-(resolution.x/2f))*size.x/resolution.x, 0, (y-(resolution.y/2f))*size.y/resolution.y);
+                
+                int x1 = Mathf.FloorToInt(((x-(resolution.x))*size.x/resolution.x) / heightMapSize.x * heightmap.width);
+                int z1 = Mathf.FloorToInt(((y-(resolution.y))*size.y/resolution.y) /heightMapSize.z * heightmap.height);
+                
+                vertices[count] = new Vector3((x-(resolution.x/2f))*size.x/resolution.x, heightmap.GetPixel(x1, z1).grayscale * heightMapSize.y , (y-(resolution.y/2f))*size.y/resolution.y);
                 count++;
             }
         }
@@ -78,5 +93,21 @@ public class Terrain
         
         return triangles; 
     }
-    
+
+    private void CalcNoise(float noiseScale, Vector2 org)
+    {
+        for (float y = 0.0f; y< noiseTex.height; y++)
+        {
+            for (float x = 0.0f; x < noiseTex.width; x++)
+            {
+                float xCoord = org.x + x / noiseTex.width * noiseScale;
+                float yCoord = org.y + y / noiseTex.height * noiseScale;
+                float sample = Mathf.PerlinNoise(xCoord, yCoord);
+                pix[(int)y * noiseTex.width + (int)x] = new Color(sample, sample, sample);
+            }
+        }
+        noiseTex.SetPixels(pix);
+        noiseTex.Apply();
+        
+    }
 }
