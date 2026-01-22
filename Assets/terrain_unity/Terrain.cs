@@ -12,7 +12,7 @@ public class Terrain
     {
         if (generateHeightMap)
         {
-            noiseTex= new Texture2D((int)heightMapSize.x, (int)heightMapSize.y);
+            noiseTex= new Texture2D((int)heightMapSize.x, (int)heightMapSize.z);
             pix = new Color[noiseTex.width * noiseTex.height];
             CalcNoise(noiseScale, org);
             ren.material.mainTexture = noiseTex;
@@ -27,6 +27,7 @@ public class Terrain
         // Populate the mesh with data
         mesh.SetVertices(Vertices);
         mesh.SetTriangles(Triangles, 0);
+        //mesh.SetUVs(0,Vertices);
         // Return 
         return mesh;
     }
@@ -104,7 +105,10 @@ public class Terrain
                 float yCoord = org.y + y / noiseTex.height * noiseScale;
                 float sample = Mathf.PerlinNoise(xCoord, yCoord);
                 pix[(int)y * noiseTex.width + (int)x] = new Color(sample, sample, sample);
+                Debug.Log(1);
             }
+
+            Debug.Log(2);
         }
         noiseTex.SetPixels(pix);
         noiseTex.Apply();

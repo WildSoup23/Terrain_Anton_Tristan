@@ -45,6 +45,7 @@ public class TerrainScript : MonoBehaviour
         mesh.name = "TerrainMesh";
         GetComponent<MeshFilter>().mesh = mesh;
         mesh.RecalculateNormals();
+       // mesh.SetColors(Colors);
     }
     
     
