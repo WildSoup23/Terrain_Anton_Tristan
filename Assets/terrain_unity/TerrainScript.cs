@@ -10,6 +10,7 @@ public class TerrainScript : MonoBehaviour
     
     //Varibles 
     public Vector2Int size;
+    public Vector2Int resolution;
     
     
     
@@ -17,7 +18,7 @@ public class TerrainScript : MonoBehaviour
     {
         if (terrain == null) terrain = new Terrain();
 
-        Mesh mesh = terrain.Regenerate(size);
+        Mesh mesh = terrain.Regenerate(size, resolution);
         mesh.name = "TerrainMesh";
         GetComponent<MeshFilter>().mesh = mesh;
     }
