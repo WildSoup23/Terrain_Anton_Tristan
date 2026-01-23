@@ -26,15 +26,24 @@ public class TerrainScript : MonoBehaviour
     
     [Space(10)]
     
+    //Texture
+    [Header("Texture")]
+    [Tooltip("The texture to used for terrain")]
+    public Texture2D terrainTexture;
+    [Tooltip("Size of texture")] 
+    public Vector2 textureSize;
+    
+    [Space(10)]
+    
     // Heightmap generation
     [Header("Heightmap generation")]
     [Tooltip("If toggled on, ignores heightMapTexture and generates own")]
     public bool generateHeightMap;
-    [Tooltip("The strenght of the noise")]
+    [Tooltip("The strength of the noise")]
     public float noiseScale =1f;
-    [Tooltip("The postion in the noisemap")]
+    [Tooltip("The position in the noise map")]
     public Vector2 org;
-    [Tooltip("Size of the noisemap")]
+    [Tooltip("Size of the noise map")]
     public Vector2 noiseMapSize;
     [Tooltip("Noise terrain material")]
     public Material noiseMaterial;
@@ -42,39 +51,55 @@ public class TerrainScript : MonoBehaviour
     [Space(10)]
     
     //Refrences
-    [Header("Refrences")]
-    [Tooltip("The terrains hight map")]
+    [Header("References")]
+    [Tooltip("The terrains height map")]
     public Texture2D heightmap;
-    [Tooltip("An array of colors assigned to diffrent heights")]
     
     //Height colors
     [Header("Height colors")]
+    [Tooltip("The order of which colors change based on height")]
     public Color32[] Colors;
-
+    [Tooltip("At which heights colors change")]
     public float[] heights;
     
     public void Regenerate()
     {
+        //If no terrain, then create new terrain
         if (terrain == null) terrain = new Terrain();
 
+        //Looks for MeshRenderer
         if(ren == null) ren = GetComponent<MeshRenderer>();
         
-        Mesh mesh = terrain.Regenerate(size, resolution, flip, heightmap, heightMapSize, heightMapHeight, generateHeightMap, ren, noiseScale, org
-        ,Colors, heights, noiseMapSize, heightMapMaterial, noiseMaterial);
+        //Creates mesh
+        Mesh mesh = terrain.Regenerate(
+            size, resolution, flip, 
+            heightmap, heightMapSize, heightMapHeight, generateHeightMap, 
+            ren, noiseScale, org, Colors, heights, 
+            noiseMapSize, heightMapMaterial, noiseMaterial, textureSize);
+        
+        //Sets mesh name
         mesh.name = "TerrainMesh";
+        
+        //Changes materials main texture and texture scale
+        ren.sharedMaterial.mainTexture = terrainTexture;
+        ren.sharedMaterial.mainTextureScale = textureSize;
+        
         GetComponent<MeshFilter>().mesh = mesh;
-        mesh.RecalculateNormals();
-       // mesh.SetColors(Colors);
     }
     
     
     void Start()
     {
+        //On start create mesh
         Regenerate();
     }
-
     
-    void Update()
+    //Draws line origo(0,0)
+    void OnDrawGizmosSelected()
     {
+        Gizmos.color = new Color(0.75f, 0.0f, 0.0f, 0.75f);
+
+        Gizmos.DrawLine(new Vector3(0,0,0), new Vector3(0,99,0));
     }
+
 }
